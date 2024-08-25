@@ -50,6 +50,12 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/post', async(req, res) => {
+            const cursor = postCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
 
 
         // Send a ping to confirm a successful connection
