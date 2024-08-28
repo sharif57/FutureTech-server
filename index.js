@@ -45,7 +45,7 @@ async function run() {
         // post related api
         app.post(('/post'), async (req, res) => {
             const newUsers = req.body;
-            console.log(newUsers);
+            // console.log(newUsers);
             const result = await postCollection.insertOne(newUsers)
             res.send(result)
         })
@@ -61,6 +61,23 @@ async function run() {
             const query = { _id: new ObjectId(id) }
             const result = await postCollection.findOne(query)
             res.send(result)
+        })
+
+        app.get('/posts/:email', async (req, res) => {
+            console.log(req.params.email);
+            const email = req.params.email;
+            const query = { email: email }
+            const result = await postCollection.find(query).toArray();
+            res.send(result)
+            console.log(result);
+        })
+
+        app.delete('/delete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await postCollection.deleteOne(query)
+            res.send(result)
+            console.log(result);
         })
 
 
