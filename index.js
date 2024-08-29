@@ -32,6 +32,8 @@ async function run() {
         // collection related
         const reviewCollection = client.db('FutureTech').collection('reviews')
         const postCollection = client.db('FutureTech').collection('post')
+        const resourceCollection = client.db('FutureTech').collection('resource')
+        const bookMarkCollection = client.db('FutureTech').collection('bookMark')
 
 
 
@@ -76,6 +78,34 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await postCollection.deleteOne(query)
+            res.send(result)
+            console.log(result);
+        })
+
+
+        // resources related api
+
+        app.get(('/resource'), async (req, res) => {
+            const cursor = resourceCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+            console.log(result);
+        })
+
+        //bookMark related api
+
+        app.post('/bookMark', async (req, res) => {
+            const newUsers = req.body;
+            // console.log(newUsers);
+            const result = await bookMarkCollection.insertOne(newUsers)
+            res.send(result)
+        })
+
+        app.get('/bookMark/:email', async (req, res) => {
+            console.log(req.params.email);
+            const email = req.params.email;
+            const query = { email: email }
+            const result = await bookMarkCollection.find(query).toArray();
             res.send(result)
             console.log(result);
         })
