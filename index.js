@@ -34,6 +34,7 @@ async function run() {
         const postCollection = client.db('FutureTech').collection('post')
         const resourceCollection = client.db('FutureTech').collection('resource')
         const bookMarkCollection = client.db('FutureTech').collection('bookMark')
+        const newsCollection = client.db('FutureTech').collection('news')
 
 
 
@@ -74,6 +75,7 @@ async function run() {
             console.log(result);
         })
 
+
         app.delete('/delete/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
@@ -108,6 +110,28 @@ async function run() {
             const result = await bookMarkCollection.find(query).toArray();
             res.send(result)
             console.log(result);
+        })
+
+        app.get('/bookMarks/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await bookMarkCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.delete('/deleteBook/:id', async (req, res) => {
+            const id =req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await bookMarkCollection.deleteOne(query)
+            res.send(result)
+        })
+
+        // news related api
+
+        app.get('/news', async(req,res)=>{
+            const cursor = newsCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
         })
 
 
