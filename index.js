@@ -35,9 +35,34 @@ async function run() {
         const resourceCollection = client.db('FutureTech').collection('resource')
         const bookMarkCollection = client.db('FutureTech').collection('bookMark')
         const newsCollection = client.db('FutureTech').collection('news')
+        const userCollection = client.db('FutureTech').collection('users')
 
 
 
+        //users related api
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+
+            const query = { email: user.email };
+            const existingUser = await userCollection.findOne(query)
+            if (existingUser) {
+                return res.send({ message: 'user already exists', insertId: null })
+            }
+
+            const result = await userCollection.insertOne(user)
+            res.send(result)
+        })
+
+        app.get(('/users'), async (req, res) => {
+            const cursor = userCollection.find();
+            const result = await cursor.toArray()
+            res.send(result)
+            console.log(result);
+        })
+
+
+        //reviews api
         app.get(('/reviews'), async (req, res) => {
             const cursor = reviewCollection.find()
             const result = await cursor.toArray()
@@ -120,17 +145,24 @@ async function run() {
         })
 
         app.delete('/deleteBook/:id', async (req, res) => {
-            const id =req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
             const result = await bookMarkCollection.deleteOne(query)
             res.send(result)
         })
 
         // news related api
 
-        app.get('/news', async(req,res)=>{
+        app.get('/news', async (req, res) => {
             const cursor = newsCollection.find()
             const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        app.get('/news/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await newsCollection.findOne(query)
             res.send(result)
         })
 
