@@ -164,6 +164,28 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/post/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const newUsers = req.body
+            const items = {
+                $set: {
+                    category: newUsers.category,
+                    title: newUsers.title,
+                    introduction: newUsers.introduction,
+                    photo: newUsers.photo,
+                    description: newUsers.description,
+                    
+
+                }
+            }
+
+            const result = await postCollection.updateOne(filter, items, options)
+            res.send(result)
+        })
+
+
         app.get('/post', async (req, res) => {
             const cursor = postCollection.find()
             const result = await cursor.toArray()
