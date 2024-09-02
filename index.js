@@ -214,6 +214,13 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/bookMark', async (req, res) => {
+            const cursor = bookMarkCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+
         app.get('/bookMark/:email', async (req, res) => {
             console.log(req.params.email);
             const email = req.params.email;
