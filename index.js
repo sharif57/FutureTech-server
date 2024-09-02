@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const app = express()
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -39,6 +40,55 @@ async function run() {
 
 
 
+        //jwt related api
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr' })
+            res.send({ token })
+        })
+
+        // middleware
+        // const verifyToken = (req, res, next) => {
+        //     console.log('inside verify token', req.headers.authorization);
+        //     if (!req.headers.authorization) {
+        //         return res.status(401).send({ message: 'forbidden access' })
+        //     }
+        //     const token = req.headers.authorization.split(' ')[1]
+        //     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        //         console.log(decoded);
+        //         if (err) {
+        //             return res.status(401).send({ message: 'forbidden access' })
+        //         }
+        //         req.decoded = decoded;
+        //         next()
+        //     })
+
+        // }
+
+        const verifyToken = (req, res, next) => {
+            console.log('Inside verifyToken middleware');
+            const authHeader = req.headers.authorization;
+
+            if (!authHeader) {
+                return res.status(401).send({ message: 'Forbidden access: No token provided' });
+            }
+
+            const token = authHeader.split(' ')[1];
+            if (!token) {
+                return res.status(401).send({ message: 'Forbidden access: Malformed token' });
+            }
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+                if (err) {
+                    return res.status(401).send({ message: 'Forbidden access: Invalid token' });
+                }
+
+                console.log('Decoded token:', decoded);
+                req.decoded = decoded;
+                next();
+            });
+        };
+
         //users related api
 
         app.post('/users', async (req, res) => {
@@ -67,10 +117,26 @@ async function run() {
         })
 
         app.get(('/users'), async (req, res) => {
+            console.log(req.headers);
             const cursor = userCollection.find();
             const result = await cursor.toArray()
             res.send(result)
             console.log(result);
+        })
+
+        app.get('/users/admin/:email', verifyToken, async (req, res) => {
+            const email = req.params.email;
+            if (email !== req.decoded.email) {
+                return res.status(403).send({ message: 'unauthorized access' })
+            }
+
+            const query = { email: email }
+            const user = await userCollection.findOne(query)
+            let admin = false;
+            if (user) {
+                admin = user?.role === 'admin'
+            }
+            res.send({ admin })
         })
 
         app.delete('/userDelete/:id', async (req, res) => {
